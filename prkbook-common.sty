@@ -1,0 +1,2373 @@
+% \mainfolder est ../ si compilation d'un chapitre, sinon c'est vide
+\ProvidesPackage{\mainfolder prkbook-common}
+% --------------------------------------------------------------------
+
+% ===================================================================
+% La partie commune aux options : minimal, screen, print, test
+% ----------------------------------------------------------------------
+% Pour différencier pdflatex, lualatex, xelatex
+\usepackage{iftex}
+% ----------------------------------------------------------------------
+% Pour les encodages en utf8 et l'utilisation dans les pdf des polices avec accents
+\ifPDFTeX % PDFLaTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+\else % LuaLaTeX & XeLaTeX
+  \usepackage{fontspec}
+  % pour éliminer "! LaTeX Error: Command \nobreakspace unavailable in encoding T1."
+  \DeclareTextCommandDefault{\nobreakspace}{\leavevmode\nobreak\ }
+\fi
+% ----------------------------------------------------------------------
+% Pour la francisation du LaTeX
+\usepackage[francais]{babel}
+  % Pour ne pas modifier les espacements standard dans les listes et les retraits
+  %\frenchbsetup{StandardLayout=true}
+  \frenchbsetup{ReduceListSpacing=true}
+  %\frenchbsetup{IndentFirst=false}
+  \renewcommand{\Frlabelitemi}{\raisebox{-0.2ex}{\textbullet}}
+  \setlength{\listindentFB}{0pt}
+
+% ----------------------------------------------------------------------
+% Package de traduction (français-anglais)
+\usepackage{etoolbox}
+%\usepackage[table]{xcolor}
+\newtoggle{en}%\toggletrue{en}
+
+% Replace decimal . by ,
+\nottoggle{en}{\mathcode`\.=\mathcode`\,}{}
+
+\usepackage{lastpage}
+\usepackage{cancel}
+\usepackage{multirow}
+\usepackage{polynom}
+\polyset{%
+   style=C,
+   delims={\big(}{\big)},
+   div=:,
+   showmiddlerow=true,
+   resultleftrule=true
+}
+
+
+%\newtoggle{countexercise}
+%\newtoggle{prof}
+%\newtoggle{ictpython}\newtoggle{ictscr}
+%\newtoggle{en}\newtoggle{7e}\newtoggle{6e}\newtoggle{5e}\newtoggle{4e}\newtoggle{3e}\newtoggle{2e}\newtoggle{1e}
+%\newtoggle{EFG}
+%\newtoggle{ws}%worked solution
+%\toggletrue{ws}
+
+% ----------------------------------------------------------------------
+% Principaux packages de math (mathtools charge amsmath, amssymb charge amsfonts)
+\usepackage{mathtools}
+\usepackage{amssymb}
+% ----------------------------------------------------------------------
+% Ensembles : entiers, réels, complexes (en deux versions \X et \Xx)
+\def\N{\mathbb{N}} \let\Nn\N
+\def\Z{\mathbb{Z}} \let\Zz\Z
+\def\D{\mathbb{D}} \let\Dd\D
+\def\Q{\mathbb{Q}} \let\Qq\Q
+\def\R{\mathbb{R}} \let\Rr\R
+\def\C{\mathbb{C}} \let\Cc\C
+\def\K{\mathbb{K}} \let\Kk\K
+\def\S{\mathbb{S}} \let\Ss\S
+
+\def\pts#1{\count0=#1 \loop \ifnum\count0>0 \advance\count 0 by -1 \ldots \repeat}
+
+% Modifications de symboles (\let est plus rapide que \renewcommand)
+%\let\epsilon\varepsilon
+\let\ge\geqslant
+\let\geq\geqslant
+\let\le\leqslant
+\let\leq\leqslant
+
+% Fonctions usuelles
+\newcommand{\chtag}{XX}
+\newcommand{\ws}{\textit{Solution détaillée : }}
+\newcommand{\srp}{Sans réponse préformulée}
+\newcommand{\ombintro}{\textit{Ce questionnaire contient 30 questions; répondez à 5 questions au moins. La plupart des questions sont à choix multiple. Chacune est suivie de réponses désignées par A, B, C, D et E. Chaque question possède une seule réponse correcte. Certaines questions sont sans réponses préformulées. Dans ce cas, la réponse correcte est un nombre entier dans $[0;999]$. Vous recevez 5 points par réponse correcte, 2 points par abstention et 0 point par réponse fausse.}}
+\newcommand{\exsupp}{Entraînement}
+\newcommand*\rfrac[2]{{}^{#1}\!/_{#2}}
+\renewcommand{\iff}{\;\Leftrightarrow{}\;}
+\newcommand{\eur}{\;\euro}
+\newcommand{\dd}{\mathrm{d}}
+\renewcommand{\emptyset}{\varnothing}
+\newcommand{\cercle}{\mathcal{C}}
+
+\DeclareMathOperator{\ii}{i}
+\let\Re\undefined\DeclareMathOperator{\Re}{Re} % redéfinition
+\let\Im\undefined\DeclareMathOperator{\Im}{Im} % redéfinition
+\DeclareMathOperator{\ch}{ch}
+\DeclareMathOperator{\sh}{sh}
+\let\tanh\undefined\DeclareMathOperator{\tanh}{th} % redéfinition
+\DeclareMathOperator{\cotan}{cotan}
+\DeclareMathOperator{\Arcsin}{Arcsin}
+\DeclareMathOperator{\Arccos}{Arccos}
+\DeclareMathOperator{\Arctan}{Arctan}
+\DeclareMathOperator{\Argsh}{Argsh}
+\DeclareMathOperator{\Argch}{Argch}
+\DeclareMathOperator{\Argth}{Argth}
+\DeclareMathOperator{\pgcd}{pgcd}
+\DeclareMathOperator{\ppcm}{ppcm}
+\DeclareMathOperator{\Ker}{Ker}
+\DeclareMathOperator{\id}{id}
+\DeclareMathOperator{\Card}{Card}
+\DeclareMathOperator{\Vect}{Vect}
+\DeclareMathOperator{\Mat}{Mat}
+\DeclareMathOperator{\rg}{rg}
+\DeclareMathOperator{\tr}{tr}
+
+% Le moins phantome pour alignement dans les matrices
+\newcommand{\ms}{\phantom{-}}
+
+\newcommand{\myclass}{Classe}
+\newcommand{\myedition}{1\up{re} édition: septembre 2020}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Variables defined (Year, version, homework, ...)
+\newcommand{\myTitle}{mathematiques}
+\newcommand{\myVersion}{\text{Version 1.0}}
+\newcommand{\hw}{\text{Exercice supplémentaire}}
+%\newcommand{\hwt}{\text{\iftoggle{en}{Suppl. exercises}{Exercices suppl.}}}
+\newcommand{\myLesson}{support de cours}
+\newcommand{\pktag}{XX}
+\newcommand{\headertag}{pk}
+\newcommand{\myDate}{24/05/2019}
+\newcommand{\myExamV}{}
+\newcommand{\mk}{\iftoggle{en}{marks}{points}}
+\newcommand{\myAC}{Calculatrice autorisée}
+\newcommand{\mySC}{Calculatrice non autorisée}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\hlineB}{\noindent\makebox[\linewidth]{\rule{\textwidth}{0.4pt}}}
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+
+\usepackage[labelfont=it,textfont={bf,it}]{caption}
+\captionsetup[figure]{labelformat=non, labelsep=space}
+% ----------------------------------------------------------------------
+% Pour l'inclusion des chapitres
+\usepackage{import}
+% ----------------------------------------------------------------------
+% Pour inclure des images
+\usepackage{graphicx}
+\usepackage{float}
+% ----------------------------------------------------------------------
+% Pour l'index
+\usepackage{imakeidx}
+\makeindex[columns=2, intoc] % title = Indice
+
+% ----------------------------------------------------------------------
+% Pour l'utilisation des couleurs
+\ifincolor\relax\else
+  % impression en gris
+  \PassOptionsToPackage{gray}{xcolor}
+\fi
+\usepackage[usenames,x11names,table]{xcolor}
+% ----------------------------------------------------------------------
+% Pour les images
+\usepackage{tikz,tikz-3dplot}
+\tdplotsetmaincoords{70}{165}
+
+\usepackage{tkz-euclide}
+\usepackage{tkz-tab}
+\usetkzobj{all} %added
+%\usepackage{tkz-tab}
+%\usepackage{tkz-fct}
+%\usetikzlibrary{}
+
+%\usetikzlibrary{calc,shadows,arrows.meta,patterns,matrix,positioning}
+\usetikzlibrary{calc,shadows,arrows.meta,patterns,matrix,quotes,angles,shapes,shapes.geometric,intersections,through}
+% --- Pour pré-compiler les images en pdf on utilise 'external'
+\usetikzlibrary{external}
+% "up to date check=simple" : si figures/abc.pdf existe on ne compile pas figures/abc.tikz
+% "only named=true" : compile que les images avec \tikzsetnextfilename,
+%       dans notre cas que les tikz importés avec \tikzinput
+% "disable dependency files" : pour ne pas utiliser les .dpth (je pense qu'on n'a pas besoin)
+% "aux in dpth=false" : pour ne pas créer les .dpth (je pense qu'on n'a pas besoin)
+%       les .dpth sont utiles si on fait ref/lable entre les images et le texte
+%\tikzexternalize[up to date check=simple, only named=true, disable dependency files=true, aux in dpth=false, optimize=false]
+% --- la commande pour inclure les images.
+% Pour inclure le fichier 'figures/abc.tikz' il faut faire \tikzinput{abc}
+% les images pré-compilés sont dans le sous-répertoire "tikzcach" de chaque chapitre.
+% Pour recréer une image il suffit de supprimer le pdf correspondant.
+% Le \import@path contient le répértoire du chapitre (il est défini dans import.sty)
+\ifincolor
+  \def\cachsuffix{_col}
+\else
+  \def\cachsuffix{_bw}
+\fi
+\newcommand{\tikzinput}[1]{%
+  %\tikzsetnextfilename{\import@path tikzcach/#1\cachsuffix}%
+  \input{figures/#1.tikz}%
+}
+
+\newcommand{\tikzmark}[3][]{\tikz[overlay,remember picture,baseline] \node [anchor=base,#1](#2) {#3};}
+\tikzset{>=stealth}
+
+% --- les figures avec échelle éventuel
+\newcommand{\myfigure}[2]{% entrée : échelle, fichier(s) figure à inclure
+\begin{center}\small
+\tikzstyle{every picture}=[scale=1.1*#1]% mise en échelle + 10% (automatiquement annulé à la fin du groupe)
+#2
+\end{center}}
+% --- pour les dessins des fonctions
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.9}
+% --- Logo 
+\definecolor{myred}{rgb}{0.93,0.26,0}
+\definecolor{myorange}{rgb}{0.97,0.58,0}
+\definecolor{myyellow}{rgb}{1,0.86,0}
+
+\newcommand{\LogoE}[1]{  % input : échelle
+{\usefont{U}{cmss}{bx}{n}
+\begin{tikzpicture}[scale=0.1*#1,transform shape]
+  \fill[color=myorange] (0,0)--(4,0)--(4,-4)--(0,-4)--cycle;
+  \fill[color=myred] (0,0)--(0,3)--(-3,3)--(-3,0)--cycle;
+  \fill[color=myyellow] (4,0)--(7,4)--(3,7)--(0,3)--cycle;
+  \node[scale=5] at (3.5,3.5) {E};
+\end{tikzpicture}}
+}
+% --- les styles pour les images
+\usepackage{\mainfolder prktikz}
+% ----------------------------------------------------------------------
+% Double page blanche pour debut chapitre
+\makeatletter
+\newcommand*{\clearemptydoublepage}{\clearpage\if@twoside \ifodd\c@page\else
+\hbox{}%
+\thispagestyle{empty}%
+\newpage%
+\if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\makeatother
+% ----------------------------------------------------------------------
+% Multi colonnes
+\usepackage{multicol}
+\setlength{\columnseprule}{0.2mm}
+% ----------------------------------------------------------------------
+% Pour insérer des codes
+
+% Récuperer le repertoire du chapitre en cours
+\makeatletter
+  \def\chapterpath{\import@path}
+\makeatother
+
+% définition de \myinputlisting
+\ifPDFTeX
+  \usepackage{listingsutf8}
+  \newcommand{\myinputlisting}[1] {
+    \lstinputlisting[inputencoding=utf8/latin1]{\chapterpath #1}
+  }
+\else
+  \usepackage{listings}
+  \newcommand{\myinputlisting}[1] {
+    \lstinputlisting{\chapterpath #1}
+  }
+\fi
+% les languages de programation utilisés
+\newcommand{\Python}{\texttt{Python}}
+\newcommand{\Sage}{\texttt{Sage}}
+% personalisations pour Python et Sage
+% la package 'textcomp' est necessaire pour 'upquote=true' (il est automatiquement chargé par fancybox, mais fancybox arrive plus tard)
+\usepackage{textcomp}
+\lstset{
+  language=Python,
+  upquote=true,
+  columns=flexible,
+  keepspaces=true,
+  basicstyle=\ttfamily,
+  commentstyle=\color{gray},
+  showspaces=false
+  showstringspaces=false
+}
+
+\lstset{
+     literate=%
+         {é}{{\'e}}1 
+}
+% \makeatletter
+% \def\lst@outputspace{\lst@bkgcolor\empty\color{white}}
+% \makeatother
+
+\makeatletter
+\def\lst@outputspace{{\ifx\lst@bkgcolor\empty\color{white}\else
+\lst@bkgcolor\fi\lst@visiblespace}}
+\lst@keepspacestrue
+\lst@keepspacestrue 
+\makeatother
+
+% ----------------------------------------------------------------------
+% Unités
+\usepackage{siunitx}
+\sisetup{locale = FR,detect-all,per-mode = symbol}
+% ----------------------------------------------------------------------
+% Commandes anti-beamer
+\newcommand{\pause}{}  % permet de mettre des \pause dans beamer pas dans poly
+\newcommand{\beameronly}[1]{}
+% ----------------------------------------------------------------------
+% Faire passer une ligne si un environnement commence par une liste
+\newcommand{\sauteligne}{\leavevmode\vspace{-\baselineskip}}
+% ----------------------------------------------------------------------
+% % Numerotationdes equation par chapitre
+\renewcommand\theequation{\arabic{equation}}
+% ----------------------------------------------------------------------
+\usepackage{enumitem}
+\setenumerate[1]{label={\arabic*)}} % Global setting
+\setenumerate[2]{label={\alph*)}} % Global setting
+\setenumerate[3]{label={\roman*)}} % Global setting
+\usepackage[noitemstyle]{pas-cours}
+% ----------------------------------------------------------------------
+
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+
+%Fonctions
+% ----------------------------------------------------------------------
+%scale, longueur totale, largeur totale, largeur parterre
+\def\parterrefleuri[#1,#2,#3,#4]{
+    \begin{tikzpicture}[scale=#1]
+        %setup
+        \pgfmathsetmacro{\L}{#2} %longueur totale
+        \pgfmathsetmacro{\l}{#3} %largeur totale
+        \pgfmathsetmacro{\x}{#4} %largeur parterre
+        %outer rectangle
+        \tkzDefPoint(0,0){A}
+        \tkzDefPoint(\L,0){B}
+        \tkzDefPoint(\L,\l){C}
+        \tkzDefPoint(0,\l){D}
+        %inner rectangle
+        \tkzDefPoint(0+\x,0+\x){E}
+        \tkzDefPoint(\L-\x,\x){F}
+        \tkzDefPoint(\L-\x,\l-\x){G}
+        \tkzDefPoint(\x,\l-\x){H}
+        %dots
+        \tkzDefPoint(0,\x){I}
+        \tkzDefPoint(\x,0){J}
+        \tkzDefPoint(\L-\x,0){K}
+        \tkzDefPoint(\L,\x){L}
+        \tkzDefPoint(\L,\l-\x){M}
+        \tkzDefPoint(\L-\x,\l){N}
+        \tkzDefPoint(\x,\l){O}
+        \tkzDefPoint(0,\l-\x){P}
+        %draw
+        \draw[thick,draw=black,fill=mygreen!20] (A) rectangle (C);
+        \draw[thick,draw=black,fill=myorange!20] (E) rectangle (G);
+        %node
+        \draw[thick,dashed] (I) -- node[above]{$\x$}(E) -- node[right]{$\x$}(J);
+        \draw[thick,dashed] (K) -- node[left]{$\x$}(F) -- node[above]{$\x$}(L);
+        \draw[thick,dashed] (M) -- node[below]{$\x$}(G) -- node[left]{$\x$}(N);
+        \draw[thick,dashed] (O) -- node[right]{$\x$}(H) -- node[below]{$\x$}(P);
+        \node[below] at (\L/2,\x){$L$};
+        \node[right] at (\L-\x,\l/2){$l$};
+        \node[] at (\L/2,\l-\x/2){parterre fleuri};
+        \tkzDrawPoints[fill=black](A,...,P)
+    \end{tikzpicture}
+}
+
+%scale, longueur, largeur, position M
+\def\trapezerectangle[#1,#2,#3,#4]{
+    \begin{tikzpicture}[scale=#1]
+        %setup
+        \pgfmathsetmacro{\L}{#2} %longueur
+        \pgfmathsetmacro{\l}{#3} %largeur
+        \pgfmathsetmacro{\x}{#4} %position M
+        %rectangle
+        \tkzDefPoint(0,0){A}
+        \tkzDefPoint(\L,0){B}
+        \tkzDefPoint(\L,\l){C}
+        \tkzDefPoint(0,\l){D}
+        %point M
+        \tkzDefPoint(\x,\l){E}
+        %draw
+        \tkzFillPolygon[color=myblue!20](B,C,E)
+        \tkzFillPolygon[color=myorange!20](A,B,E,D)
+        \draw[thick,draw=black] (A) rectangle (C);
+        \draw[thick] (B) -- (E);
+        %node
+        \node[above] at (E){$M$};
+        \tkzLabelSegment[above](E,D){$DM=x$}
+        \tkzLabelSegment[left](A,D){$\l$}
+        \tkzLabelSegment[below](A,B){$\L$}
+        \tkzLabelPoints[below left](A)
+        \tkzLabelPoints[below right](B)
+        \tkzLabelPoints[above right](C)
+        \tkzLabelPoints[above left](D)
+        \tkzDrawPoints[fill=black](A,...,E)
+    \end{tikzpicture}
+}
+% ----------------------------------------------------------------------
+%scale, coordonnées C(x,y), E(x,y), G(x,y) (only use integers)
+\def\deuxrectangles[#1,#2,#3,#4,#5,#6,#7]{
+    \begin{tikzpicture}[scale=#1]
+        %setup
+        \pgfmathsetmacro{\xC}{#2} 
+        \pgfmathsetmacro{\yC}{#3} 
+        \pgfmathsetmacro{\xE}{#4}
+        \pgfmathsetmacro{\yE}{#5}
+        \pgfmathsetmacro{\xG}{#6}
+        \pgfmathsetmacro{\yG}{#7}
+        \pgfmathsetmacro{\yFG}{int(\yG-\yE)}
+        
+        %outer rectangle
+        \tkzDefPoint(0,0){A}
+        \tkzDefPoint(\xC,0){B}
+        \tkzDefPoint(\xC,\yC){C}
+        \tkzDefPoint(0,\yC){D}
+        %inner rectangle
+        \tkzDefPoint(\xE,\yE){E}
+        \tkzDefPoint(\xG,\yE){F}
+        \tkzDefPoint(\xG,\yG){G}
+        \tkzDefPoint(\xE,\yG){H}
+        %draw
+        \draw[thick,draw=black,fill=myorange!20] (A) rectangle (C);
+        \draw[thick,draw=black,fill=white] (E) rectangle (G);
+        %node
+        \tkzLabelSegment[below](E,F){$c$}
+        \tkzLabelSegment[below](A,B){$a$}
+        \tkzLabelSegment[right](B,C){$b$}
+        \tkzLabelSegment[right](F,G){$\yFG$}
+        \tkzLabelPoints[below left](A,E)
+        \tkzLabelPoints[below right](B,F)
+        \tkzLabelPoints[above right](C,G)
+        \tkzLabelPoints[above left](D,H)
+        \tkzDrawPoints[fill=black](A,...,H)
+    \end{tikzpicture}
+}
+% ----------------------------------------------------------------------
+%scale, coordonnées C(x,y), E(x,y) (only use integers)
+\def\rectanglecoupe[#1,#2,#3,#4,#5]{
+    \begin{tikzpicture}[scale=#1]
+        %setup
+        \pgfmathsetmacro{\xC}{#2} 
+        \pgfmathsetmacro{\yC}{#3} 
+        \pgfmathsetmacro{\xE}{#4}
+        \pgfmathsetmacro{\yE}{#5}
+        \pgfmathsetmacro{\xCD}{int(\xE-\xC)}
+        
+        %points
+        \tkzDefPoint(0,0){A}
+        \tkzDefPoint(\xC,0){B}
+        \tkzDefPoint(\xC,\yC){C}
+        \tkzDefPoint(\xE,\yC){D}
+        \tkzDefPoint(\xE,\yE){E}
+        \tkzDefPoint(0,\yE){F}
+        %draw
+        \tkzDrawPolygon[thick,fill=myorange!20](A,B,C,D,E,F)
+        %node
+        \tkzLabelSegment[left](A,F){$b$}
+        \tkzLabelSegment[below](A,B){$a$}
+        \tkzLabelSegment[right](B,C){$\yC$}
+        \tkzLabelSegment[below](C,D){$\xCD$}
+        \tkzLabelPoints[below left](A)
+        \tkzLabelPoints[below right](B,D)
+        \tkzLabelPoints[above right](E)
+        \tkzLabelPoints[above left](C,F)
+        \tkzDrawPoints[fill=black](A,...,F)
+    \end{tikzpicture}
+}
+
+%\rectanglecle[0.75,a] %scale, label a
+% ----------------------------------------------------------------------
+%scale, label a
+\def\rectanglecle[#1,#2]{
+    \begin{tikzpicture}[scale=#1]
+        %points
+        \tkzDefPoint(0,0){A}
+        \tkzDefPoint(1,0){B}
+        \tkzDefPoint(2,0){C}
+        \tkzDefPoint(2,1){D}
+        \tkzDefPoint(3,1){E}
+        \tkzDefPoint(3,0){F}
+        \tkzDefPoint(4,0){G}
+        \tkzDefPoint(5,0){H}
+        \tkzDefPoint(5,1){I}
+        \tkzDefPoint(4,1){J}
+        \tkzDefPoint(4,2){K}
+        \tkzDefPoint(5,2){L}
+        \tkzDefPoint(5,3){M}
+        \tkzDefPoint(4,3){N}
+        \tkzDefPoint(3,3){O}
+        \tkzDefPoint(3,2){P}
+        \tkzDefPoint(2,2){Q}
+        \tkzDefPoint(2,3){R}
+        \tkzDefPoint(1,3){S}
+        \tkzDefPoint(0,3){T}
+        \tkzDefPoint(0,2){U}
+        \tkzDefPoint(1,2){V}
+        \tkzDefPoint(1,1){W}
+        \tkzDefPoint(0,1){X}
+        %draw
+        \tkzDrawPolygon[thick,fill=myorange!20](A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X)
+        %node
+        \tkzLabelSegment[below=2pt](A,B){$#2$}
+        \tkzMarkSegments[mark=|](A,B B,C C,D D,E E,F F,G G,H H,I I,J J,K K,L L,M M,N N,O O,P P,Q Q,R R,S S,T T,U U,V V,W W,X X,A)
+        \tkzDrawPoints[fill=black](A,...,X)
+    \end{tikzpicture}
+}
+
+% ----------------------------------------------------------------------
+%plotting cubes (3D)
+% Three counters
+\newcounter{x}
+\newcounter{y}
+\newcounter{z}
+% The angles of x,y,z-axes
+\newcommand\xaxis{210}
+\newcommand\yaxis{-30}
+\newcommand\zaxis{90}
+% The top side of a cube
+\newcommand\topside[3]{
+  \fill[fill=myorange!20, draw=black,shift={(\xaxis:#1)},shift={(\yaxis:#2)},
+  shift={(\zaxis:#3)}] (0,0) -- (30:1) -- (0,1) --(150:1)--(0,0);
+}
+% The left side of a cube
+\newcommand\leftside[3]{
+  \fill[fill=myred!20, draw=black,shift={(\xaxis:#1)},shift={(\yaxis:#2)},
+  shift={(\zaxis:#3)}] (0,0) -- (0,-1) -- (210:1) --(150:1)--(0,0);
+}
+% The right side of a cube
+\newcommand\rightside[3]{
+  \fill[fill=myblue!20, draw=black,shift={(\xaxis:#1)},shift={(\yaxis:#2)},
+  shift={(\zaxis:#3)}] (0,0) -- (30:1) -- (-30:1) --(0,-1)--(0,0);
+}
+% The cube 
+\newcommand\cubeA[3]{
+  \topside{#1}{#2}{#3} \leftside{#1}{#2}{#3} \rightside{#1}{#2}{#3}
+}
+% Definition of \planepartition
+% To draw the following plane partition, just write \planepartition{ {a, b, c}, {d,e} }.
+%  a b c
+%  d e
+\newcommand\planepartition[1]{
+ \setcounter{x}{-1}
+  \foreach \a in {#1} {
+    \addtocounter{x}{1}
+    \setcounter{y}{-1}
+    \foreach \b in \a {
+      \addtocounter{y}{1}
+      \setcounter{z}{-1}
+      \foreach \c in {1,...,\b} {
+        \addtocounter{z}{1}
+        \cube{\value{x}}{\value{y}}{\value{z}}
+      }
+    }
+  }
+}
+
+% ----------------------------------------------------------------------
+%scale, long side, small side
+\def\carreid[#1,#2,#3]{
+    \begin{tikzpicture}[scale=#1]
+        %setup
+        \pgfmathsetmacro{\x}{#2} 
+        \pgfmathsetmacro{\y}{#3} 
+        %points
+        \tkzDefPoint(0,0){A}
+        \tkzDefPoint(\x,0){B}
+        \tkzDefPoint(\x,\x){C}
+        \tkzDefPoint(0,\x){D}
+        \tkzDefPoint(\y,0){E}
+        \tkzDefPoint(\x,\y){F}
+        \tkzDefPoint(\y,\x){G}
+        \tkzDefPoint(0,\y){H}
+        \tkzDefPoint(\y,\y){I}
+        %draw
+        \fill[fill=myred!20] (A) rectangle (I);
+        \fill[fill=blue!20] (I) rectangle (C);
+        \fill[fill=green!20] (I) rectangle (B);
+        \fill[fill=green!20] (D) rectangle (I);
+        \tkzDrawPolygon[thick](A,B,C,D)
+        \tkzDrawSegments[thick](E,G F,H)
+        %node
+        \tkzLabelSegment[below](A,E){$a$}
+        \tkzLabelSegment[below](E,B){$b$}
+        \tkzLabelSegment[right](B,F){$a$}
+        \tkzLabelSegment[right](F,C){$b$}
+        \node[] at (\y/2,\y/2){$a^2$};
+        \node[] at (\y+\x/2-\y/2,\y/2){$ab$};
+        \node[] at (\y+\x/2-\y/2,\y+\x/2-\y/2){$b^2$};
+        \node[] at (\y/2,\y+\x/2-\y/2){$ab$};
+    \end{tikzpicture}
+}
+
+%Definition of functions
+%Angles (5e)
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\angleA[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(\deg:\r){B}
+    % mark angle
+    \tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzLabelAngle[pos=1](A,O,B){{\color{mygreen}$\deg^\circ$}}
+    % lines 
+    \tkzDrawLines[add= 0 and 0.25](O,A O,B)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,O)
+    \tkzLabelPoints(O,A,B)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\angleAp[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \pgfmathsetmacro{\r}{#3}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(359:\r){B}
+    % mark angle
+    \tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzLabelAngle[pos=-1](A,O,B){{\color{mygreen}$360^\circ$}}
+    % lines 
+    \tkzDrawLines[add= 0 and 0.25](O,A)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,O)
+    \tkzLabelPoints(O,A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\angleApp[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \pgfmathsetmacro{\r}{#3}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(359:\r){B}
+    % mark angle
+    %\tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    %\tkzLabelAngle[pos=-1](A,O,B){{\color{mygreen}$360^\circ$}}
+    % lines 
+    \tkzDrawLines[add= 0 and 0.25](O,A)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,O)
+    \tkzLabelPoints(O,A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\angleAr[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(\deg:\r){B}
+    % mark angle
+    \tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzLabelAngle[pos=-1](A,O,B){{\color{mygreen}$\deg^\circ$}}
+    % lines 
+    \tkzDrawLines[add= 0 and 0.25](O,A O,B)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,O)
+    \tkzLabelPoints(A)
+    \tkzLabelPoints[below right=1pt](B)
+    \tkzLabelPoints[below right=2pt](O)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r (whole degree only)
+\def\angleB[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathtruncatemacro{\x}{round(360-#3)}
+    \pgfmathsetmacro{\r}{#4}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(\deg:\r){B}
+    % mark angle
+    \tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzLabelAngle[pos=1](A,O,B){{\color{mygreen}$\deg^\circ$}}
+    \tkzLabelAngle[pos=2](A,O,B){\qquad{\color{mygreen}angle saillant}}
+    \tkzMarkAngle[fill=mypurple!40,mark=,size=0.2,arc=l,opacity=1](B,O,A)
+    \tkzLabelAngle[pos=-1](B,O,A){{\color{mypurple}$\x^\circ$}}
+    \tkzLabelAngle[pos=-2](B,O,A){\qquad{\color{mypurple}angle rentrant}}
+    % lines 
+    \tkzDrawLines[add= 0 and 0.25](O,A O,B)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,O)
+    \tkzLabelPoints(O,A,B)
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, rotate, dA, rA, dC, rC, dB, rB
+\def\angles[#1,#2,#3,#4,#5,#6,#7,#8]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    %\tkzInit[xmax=4,xmin=-4,ymax=3,ymin=-3]\tkzClip
+    \pgfmathsetmacro{\dA}{#3}
+    \pgfmathsetmacro{\rA}{#4}
+    \pgfmathsetmacro{\dB}{#5}
+    \pgfmathsetmacro{\rB}{#6} 
+    \pgfmathsetmacro{\dC}{#7}
+    \pgfmathsetmacro{\rC}{#8}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(\dA:\rA){A}
+    \tkzDefPoint(\dB:\rB){B}
+    \tkzDefPoint(\dC:\rC){C}
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](B,O,C)
+    % lines
+    \tkzDrawLines[add= 0 and 0.25](O,A O,B O,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,O)
+    \tkzLabelPoints(O,A,B,C)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, dA, rA, dC, rC, dB, rB
+\def\anglesnonadj[#1,#2,#3,#4,#5,#6,#7,#8]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    %\tkzInit[xmax=4,xmin=-4,ymax=3,ymin=-3]\tkzClip
+    \pgfmathsetmacro{\dA}{#3}
+    \pgfmathsetmacro{\rA}{#4}
+    \pgfmathsetmacro{\dB}{#5}
+    \pgfmathsetmacro{\rB}{#6} 
+    \pgfmathsetmacro{\dC}{#7}
+    \pgfmathsetmacro{\rC}{#8}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(\dB:\rB/3){Or}
+    \tkzDefPoint(\dA:\rA){A}
+    \tkzDefPoint(\dB:\rB){B}
+    \tkzDefPoint(\dC:\rC){C}
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](B,Or,C)
+    % lines
+    \tkzDrawLines[add= 0 and 0.25](O,A O,B Or,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,O,Or)
+    \tkzLabelPoints(O,A,B,C)
+    \tkzLabelPoint[right](Or){$O'$}
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, rotate, dB, rB
+\def\anglesr[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\dB}{#3}
+    \pgfmathsetmacro{\rB}{#4}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\rB){A}
+    \tkzDefPoint(\dB:\rB){B}
+    \tkzDefPoint(90:\rB){C}
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](B,O,C)
+    \tkzMarkRightAngle[draw=black,size=.2](A,O,C);
+    % lines
+    \tkzDrawLines[add= 0 and 0.25](O,A O,B O,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,O)
+    \tkzLabelPoints(O,A,B,C)
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, rotate, dA, rA, r
+\def\anglesopp[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(180:\r){A'}
+    \tkzDefPoint(\deg:\r){B}
+    \tkzDefPoint(\deg+180:\r){B'}
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](A',O,B')
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.2](A,A' B,B')
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,A',B',O)
+    \tkzLabelPoints[above right](A')
+    \tkzLabelPoints[above left](B)
+    \tkzLabelPoints[below](O)
+    \tkzLabelPoints[below right](B')
+    \tkzLabelPoints[below left](A)
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, rotate, dA, rA, r
+\def\anglesoppB[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    % polar coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(180:\r){A'}
+    \tkzDefPoint(\deg:\r){B}
+    \tkzDefPoint(\deg+180:\r){B'}
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](A,O,B)
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](A',O,B')
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.3,arc=l,opacity=1](B,O,A')
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.2](A,A' B,B')
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,A',B',O)
+    \tkzLabelPoints[above right](A')
+    \tkzLabelPoints[above left](B)
+    \tkzLabelPoints[below](O)
+    \tkzLabelPoints[below right](B')
+    \tkzLabelPoints[below left](A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r, xB, yB, xD, yD
+\def\anglesaltint[#1,#2,#3,#4,#5,#6,#7,#8]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    \pgfmathsetmacro{\xB}{#5}
+    \pgfmathsetmacro{\yB}{#6}
+    \pgfmathsetmacro{\xD}{#7}
+    \pgfmathsetmacro{\yD}{#8}
+    \pgfmathsetmacro{\rE}{\r*1.75}
+    % coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(180:\r){C}
+    \tkzDefPoint(\xB,\yB){B}
+    \tkzDefPoint(\xD,\yD){D}
+    \tkzDefPoint(\deg:\rE){E}
+    \tkzInterLL(B,D)(E,O)\tkzGetPoint{P}
+    
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](D,P,O)
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](A,O,P)
+    
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.2](B,D A,C)
+    \tkzDrawLines[add= 0.3 and 0.3](P,O)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D,O,P)
+    \tkzLabelPoints[above left](P)
+    \tkzLabelPoints[below right](O)
+    \tkzLabelPoints[above](B,D)
+    \tkzLabelPoints[below](A,C)
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r, xB, yB, xD, yD
+\def\anglesaltintB[#1,#2,#3,#4,#5,#6,#7,#8]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    \pgfmathsetmacro{\xB}{#5}
+    \pgfmathsetmacro{\yB}{#6}
+    \pgfmathsetmacro{\xD}{#7}
+    \pgfmathsetmacro{\yD}{#8}
+    \pgfmathsetmacro{\rE}{\r*1.75}
+    % coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(180:\r){C}
+    \tkzDefPoint(\xB,\yB){B}
+    \tkzDefPoint(\xD,\yD){D}
+    \tkzDefPoint(\deg:\rE){E}
+    \tkzInterLL(B,D)(E,O)\tkzGetPoint{P}
+    
+    \tkzLabelAngle[pos=1.25](P,O,C){\footnotesize{$\left(AC\right)\parallel\left(BD\right)\qquad$}}
+    
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.2](B,D A,C)
+    \tkzDrawLines[add= 0.3 and 0.3](P,O)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D,O,P)
+    \tkzLabelPoints[above left](P)
+    \tkzLabelPoints[below right](O)
+    \tkzLabelPoints[above](B,D)
+    \tkzLabelPoints[below](A,C)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r, xB, yB, xD, yD
+\def\anglescorr[#1,#2,#3,#4,#5,#6,#7,#8]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    \pgfmathsetmacro{\xB}{#5}
+    \pgfmathsetmacro{\yB}{#6}
+    \pgfmathsetmacro{\xD}{#7}
+    \pgfmathsetmacro{\yD}{#8}
+    \pgfmathsetmacro{\rE}{\r*1.75}
+    % coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(180:\r){C}
+    \tkzDefPoint(\xB,\yB){B}
+    \tkzDefPoint(\xD,\yD){D}
+    \tkzDefPoint(\deg:\rE){E}
+    \tkzInterLL(B,D)(E,O)\tkzGetPoint{P}
+    
+    % mark angle
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](B,P,E)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](A,O,P)
+    
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.2](B,D E,O A,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D,E,O,P)
+    \tkzLabelPoints[above left](P,E)
+    \tkzLabelPoints[below right](O)
+    \tkzLabelPoints[above](B,D)
+    \tkzLabelPoints[below](A,C)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r, xB, yB, xD, yD
+\def\anglesaltext[#1,#2,#3,#4,#5,#6,#7,#8]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    \pgfmathsetmacro{\xB}{#5}
+    \pgfmathsetmacro{\yB}{#6}
+    \pgfmathsetmacro{\xD}{#7}
+    \pgfmathsetmacro{\yD}{#8}
+    \pgfmathsetmacro{\rE}{\r*1.75}
+    \pgfmathsetmacro{\rF}{\r*.5}
+    % coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(180:\r){C}
+    \tkzDefPoint(\xB,\yB){B}
+    \tkzDefPoint(\xD,\yD){D}
+    \tkzDefPoint(\deg:\rE){E}
+    \tkzDefPoint(\deg+180:\rF){F}
+    \tkzInterLL(B,D)(E,O)\tkzGetPoint{P}
+    
+    % mark angle
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](C,O,F)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](B,P,E)
+    
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.2](B,D E,F A,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D,E,O,P,F)
+    \tkzLabelPoints[above left](P,E)
+    \tkzLabelPoints[below right](O,F)
+    \tkzLabelPoints[above](B,D)
+    \tkzLabelPoints[below](A,C)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r, xB, yB, xD, yD
+\def\anglescorrB[#1,#2,#3,#4,#5,#6,#7,#8]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    \pgfmathsetmacro{\xB}{#5}
+    \pgfmathsetmacro{\yB}{#6}
+    \pgfmathsetmacro{\xD}{#7}
+    \pgfmathsetmacro{\yD}{#8}
+    \pgfmathsetmacro{\rE}{\r*1.75}
+    % coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){A}
+    \tkzDefPoint(180:\r){C}
+    \tkzDefPoint(\xB,\yB){B}
+    \tkzDefPoint(\xD,\yD){D}
+    \tkzDefPoint(\deg:\rE){E}
+    \tkzInterLL(B,D)(E,O)\tkzGetPoint{P}
+    
+    \tkzLabelAngle[pos=1.25](P,O,C){\footnotesize{$\left(AC\right)\parallel\left(BD\right)\qquad$}}
+    
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.2](B,D E,O A,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D,E,O,P)
+    \tkzLabelPoints[above left](P,E)
+    \tkzLabelPoints[below right](O)
+    \tkzLabelPoints[above](B,D)
+    \tkzLabelPoints[below](A,C)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, dA, rA, r
+\def\triangleA[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=4,ymin=0,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degB}{#3}
+    \pgfmathsetmacro{\degC}{int(180-\degB-\degA)}
+    
+    % polar coordinates
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:4){B}
+    
+    \tkzDefPointBy[rotation=center B angle 180-\degB](A)\tkzGetPoint{B'}
+    \tkzDefPointBy[rotation=center A angle \degA](B)\tkzGetPoint{A'}
+    
+    \tkzInterLL(A,A')(B,B')\tkzGetPoint{C}
+    
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](B,A,C)
+    \tkzLabelAngle[pos=0.9](B,A,C){\color{myred}\footnotesize{$\degA^\circ$}}
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](C,B,A)
+    \tkzLabelAngle[pos=0.9](C,B,A){\color{myblue}\footnotesize{$\degB^\circ$}}
+    \tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](A,C,B)
+    \tkzLabelAngle[pos=0.9](B,C,A){\color{mygreen}\footnotesize{$\degC^\circ$}}
+    
+    % lines
+    \tkzDrawPolygon(A,B,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[below left](A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, dA, rA, r
+\def\triangleB[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=4,ymin=0,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degB}{#3}
+    \pgfmathsetmacro{\degC}{int(180-\degB-\degA)}
+    
+    % polar coordinates
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:4){B}
+    
+    \tkzDefPointBy[rotation=center B angle 180-\degB](A)\tkzGetPoint{B'}
+    \tkzDefPointBy[rotation=center A angle \degA](B)\tkzGetPoint{A'}
+    
+    \tkzInterLL(A,A')(B,B')\tkzGetPoint{C}
+    
+    \tkzDefPointWith[colinear=at C, K=0.65](A,B)\tkzGetPoint{E}
+    \tkzDefPointWith[colinear=at C, K=0.35](B,A)\tkzGetPoint{D}
+    
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](B,A,C)
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](D,C,A)
+    
+    %\tkzLabelAngle[pos=0.9](B,A,C){\color{myred}\footnotesize{$\degA^\circ$}}
+    \tkzMarkAngle[fill=myblue!40,mark=||,size=0.5,arc=l,opacity=1](C,B,A)
+    \tkzMarkAngle[fill=myblue!40,mark=||,size=0.5,arc=l,opacity=1](B,C,E)
+    %\tkzLabelAngle[pos=0.9](C,B,A){\color{myblue}\footnotesize{$\degB^\circ$}}
+    \tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](A,C,B)
+    %\tkzLabelAngle[pos=0.9](B,C,A){\color{mygreen}\footnotesize{$\degC^\circ$}}
+    
+    % lines
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawLines[](D,E)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D,E)
+    \tkzLabelPoints[above right](C,E)
+    \tkzLabelPoints[above left](D)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[below left](A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%
+\def\quadriA[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=5,ymin=0,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degB}{#3}
+    \pgfmathsetmacro{\degC}{#4}
+    \pgfmathsetmacro{\degD}{int(360-\degA-\degB-\degC)}
+    
+    % polar coordinates
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:5){B}
+    \tkzDefPoint(\degA:2){D}
+    
+    \tkzDefPointBy[rotation=center D angle \degD](A)\tkzGetPoint{C'}
+    \tkzDefPointBy[rotation=center B angle 360-\degB](A)\tkzGetPoint{C''}
+    
+    \tkzInterLL(D,C')(B,C'')\tkzGetPoint{C}
+    
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](B,A,D)
+    \tkzLabelAngle[pos=0.8](B,A,D){\color{myred}\footnotesize{$\degA^\circ$}}
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](C,B,A)
+    \tkzLabelAngle[pos=0.8](C,B,A){\color{myblue}\footnotesize{$\degB^\circ$}}
+    \tkzMarkAngle[fill=mygreen!40,mark=,size=0.5,arc=l,opacity=1](D,C,B)
+    \tkzLabelAngle[pos=0.75](D,C,B){\color{mygreen}\footnotesize{$\degC^\circ$}}
+    \tkzMarkAngle[fill=mypurple!40,mark=,size=0.5,arc=l,opacity=1](A,D,C)
+    \tkzLabelAngle[pos=0.75](A,D,C){\color{mypurple}\footnotesize{$\degD^\circ$}}
+    
+    % lines
+    \tkzDrawPolygon(A,B,C,D)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[above left](D)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[below left](A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%
+\def\quadriB[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=5,ymin=0,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degB}{#3}
+    \pgfmathsetmacro{\degC}{#4}
+    \pgfmathsetmacro{\degD}{int(360-\degA-\degB-\degC)}
+    
+    % polar coordinates
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:5){B}
+    \tkzDefPoint(\degA:2){D}
+    
+    \tkzDefPointBy[rotation=center D angle \degD](A)\tkzGetPoint{C'}
+    \tkzDefPointBy[rotation=center B angle 360-\degB](A)\tkzGetPoint{C''}
+    
+    \tkzInterLL(D,C')(B,C'')\tkzGetPoint{C}
+    
+    % mark angle
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.75,arc=l,opacity=1](B,A,C)
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.75,arc=l,opacity=1](C,B,A)
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.75,arc=l,opacity=1](A,C,B)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.75,arc=l,opacity=1](D,C,A)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](A,D,C)
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.75,arc=l,opacity=1](C,A,D)
+    
+    % lines
+    \tkzDrawPolygon(A,B,C,D)
+    \tkzDrawSegments(A,C)
+    % points
+    \tkzDrawPoints[color=black,fill=black](A,B,C,D)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[above left](D)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[below left](A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, angleA, angleD
+\def\rectangledeuxangles[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=9,ymin=0,ymax=4]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degD}{#3} 
+    % figure
+    \tkzDefPoint(0,0){A}
+    \tkzDefPoint(2,0){A'}
+    \tkzDefPoint(0,4){D}
+    \tkzDefPoint(2,4){D'}
+    
+    \tkzDefPointBy[rotation=center A angle \degA](A')\tkzGetPoint{C'}
+    \tkzInterLL(D,D')(A,C')\tkzGetPoint{C}
+    
+    \tkzDefPointBy[rotation=center D angle \degD](A)\tkzGetPoint{I'}
+    \tkzInterLL(A,A')(D,I') \tkzGetPoint{I}
+
+    \tkzDefPointBy[projection=onto A--I](C) \tkzGetPoint{B}
+    \tkzDefPointBy[projection=onto D--C](I) \tkzGetPoint{J}
+    \tkzInterLL(A,C)(I,J) \tkzGetPoint{M}
+    \tkzInterLL(A,C)(D,I) \tkzGetPoint{O}
+
+    % polygon fill
+    \tkzFillPolygon[fill=myorange!20](D,O,M,J)
+    
+    % angles
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.75,arc=l,opacity=1](A,D,I)
+    \tkzLabelAngle[pos=1.25](A,D,I){\footnotesize{$\degD^\circ$}}
+    
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.75,arc=l,opacity=1](B,A,C)
+    \tkzLabelAngle[pos=1.5](B,A,C){\footnotesize{$\degA^\circ$}}
+    
+    \tkzMarkRightAngle[draw=black,size=.5](B,I,J);
+    \tkzLabelAngle[pos=1.2](B,I,J){\footnotesize{$90^\circ$}}
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C,D)
+    \tkzDrawSegments(A,C D,I I,J)
+    
+    % label and draw points
+    \tkzLabelPoints[below right](B,M)
+    \tkzLabelPoints[below](O,I)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[above right](C,J)
+    \tkzLabelPoints[above left](D)
+    \tkzDrawPoints[fill=black](A,B,C,D,I,J,O,M)
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, angleA, angleI
+\def\parallelogrammedeuxangles[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=6,ymin=0,ymax=2]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degI}{#3}
+    \pgfmathsetmacro{\degB}{\degA+\degI-180} 
+    % figure
+    \tkzDefPoint(0,0){A}
+    \tkzDefPoint(4,0){B}
+    
+    \tkzDefPointBy[rotation=center A angle \degA](B)\tkzGetPoint{A'}
+    \tkzDefPointBy[rotation=center B angle \degB](A)\tkzGetPoint{B'}
+    
+    \tkzInterLL(A,A')(B,B') \tkzGetPoint{I}
+    
+    \tkzDefPointBy[rotation=center I angle 180](A)\tkzGetPoint{C}
+    \tkzDefPointBy[rotation=center I angle 180](B)\tkzGetPoint{D}
+    
+    % polygon fill
+    \tkzFillPolygon[fill=myorange!20](D,I,C)
+    
+    % angles
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.25,arc=l,opacity=1](A,I,B)
+    \tkzLabelAngle[pos=0.5](A,I,B){\footnotesize{$\degI^\circ$}}
+    
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.75,arc=l,opacity=1](B,A,I)
+    \tkzLabelAngle[pos=1.2](B,A,I){\footnotesize{$\degA^\circ$}}
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C,D)
+    \tkzDrawSegments(A,C B,D)
+    
+    % label and draw points
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above right](I)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[above left](D)
+    \tkzDrawPoints[fill=black](A,B,C,D,I)
+   
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, angleA, angleA2
+\def\parallelogrammedeuxanglesB[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=7,ymin=0,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degI}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:4){B}
+    \tkzDefPoint(\degI:3.25){D}
+    \tkzDefPointWith[colinear=at D](A,B)\tkzGetPoint{C}
+
+    % polygon fill
+    \tkzFillPolygon[fill=myorange!20](A,C,D)
+    
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=1,arc=l,opacity=1](B,A,C)
+    \tkzLabelAngle[pos=1.4](B,A,C){\footnotesize{$\degA^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.75,arc=l,opacity=1](B,A,D)
+    \tkzLabelAngle[pos=1.2](C,A,D){\footnotesize{$\degI^\circ$}}
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C,D)
+    \tkzDrawSegments(A,C B,D)
+    
+    % label and draw points
+    \tkzLabelPoints[below right](B)
+    %\tkzLabelPoints[above right](I)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[above left](D)
+    \tkzDrawPoints[fill=black](A,B,C,D)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, angle
+\def\parallelogrammeA[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \tkzInit[xmin=-0.5,xmax=7,ymin=-0.5,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\deg}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:5.5){B}
+    \tkzDefPoint(\deg:2.5){D}
+    \tkzDefPointWith[colinear=at D](A,B)\tkzGetPoint{C}
+    
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](B,A,D)
+    \tkzMarkAngle[fill=myred!40,mark=|,size=0.5,arc=l,opacity=1](D,C,B)
+
+    \tkzMarkAngle[fill=myblue!40,mark=||,size=0.5,arc=l,opacity=1](A,D,C)
+    \tkzMarkAngle[fill=myblue!40,mark=||,size=0.5,arc=l,opacity=1](C,B,A)
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C,D)
+    
+    % label and draw points
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[above left](D)
+    \tkzDrawPoints[fill=black](A,B,C,D)
+    
+    \tkzInterLL(A,C)(B,D)\tkzGetPoint{M}
+    
+    \tkzLabelPoint[above](M){\footnotesize{${\color{myred}\widehat{BAD}}={\color{myred}\widehat{DCB}}$}}
+    \tkzLabelPoint[below](M){\footnotesize{${\color{myblue}\widehat{CBA}}={\color{myblue}\widehat{ADC}}$}}
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, angle
+\def\parallelogrammeB[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \tkzInit[xmin=-0.5,xmax=7,ymin=-0.5,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\deg}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:5.5){B}
+    \tkzDefPoint(\deg:2.5){D}
+    \tkzDefPointWith[colinear=at D](A,B)\tkzGetPoint{C}
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C,D)
+    
+    % label and draw points
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[above left](D)
+    \tkzDrawPoints[fill=black](A,B,C,D)
+    
+    \tkzInterLL(A,C)(B,D)\tkzGetPoint{M}
+    
+    \tkzLabelPoint[above](M){\footnotesize{$\left(AB\right)\parallel\left(CD\right)$}}
+    \tkzLabelPoint[below](M){\footnotesize{$\left(AD\right)\parallel\left(BC\right)$}}
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, angleB, angleE
+\def\triangledeuxangles[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=-3,xmax=6,ymin=0,ymax=3]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degB}{#2}
+    \pgfmathsetmacro{\degE}{#3}
+    \pgfmathsetmacro{\degEf}{\degB+\degE}
+
+    % figure
+    \tkzDefPoint(0:0){B}
+    \tkzDefPoint(0:5){C}
+    \tkzDefPoint(\degEf:3){E}
+    
+    \tkzDefPointBy[rotation=center C angle \degB](B)\tkzGetPoint{D'}
+    \tkzDefPointBy[projection=onto C--E](B) \tkzGetPoint{D}
+    \tkzMarkRightAngle[draw=black,size=.25](B,D,E);
+    \tkzDefPointBy[rotation=center E angle -\degE](B)\tkzGetPoint{A'}
+    
+    \tkzInterLL(B,C)(A',E)\tkzGetPoint{A}
+    
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.4,arc=l,opacity=1](C,B,D)
+    \tkzLabelAngle[pos=0.75](B,B,D){\footnotesize{$\degB^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.6,arc=l,opacity=1](A,E,B)
+    \tkzLabelAngle[pos=0.9](A,E,B){\footnotesize{$\degE^\circ$}}
+    
+    \tkzLabelAngle[pos=1](B,D,C){\footnotesize{$\left(AE\right)\parallel\left(BD\right)$}}
+    
+    \tkzMarkRightAngle[draw=black,size=.25](A,E,C);
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,C,E)
+    \tkzDrawSegments(B,E B,D)
+    
+    % label and draw points
+    \tkzLabelPoints[below](B)
+    \tkzLabelPoints[below right](C)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[above right](E,D)
+    \tkzDrawPoints[fill=black](A,B,C,D,E)
+   
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, angleB, angleC, angleE
+\def\triangletroisangles[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=9,ymin=0,ymax=3]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degC}{#3}
+    \pgfmathsetmacro{\degE}{#4}
+    \pgfmathsetmacro{\deg}{180-\degE}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:1){A'}
+    \tkzDefPoint(\degA:3){C}
+    \tkzDefPointBy[rotation=center C angle \degC](A)\tkzGetPoint{C'}
+    \tkzInterLL(C,C')(A,A')\tkzGetPoint{D}
+    
+    \tkzDefPointBy[rotation=center C angle \deg](A)\tkzGetPoint{B'}
+    \tkzInterLL(C,B')(A,D)\tkzGetPoint{B}
+
+    \tkzDefPointWith[colinear=at D](A,C)\tkzGetPoint{E'}
+    \tkzInterLL(D,E')(B,C)\tkzGetPoint{E}
+    
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.4,arc=l,opacity=1](D,A,C)
+    \tkzLabelAngle[pos=0.8](D,A,C){\footnotesize{$\degA^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](A,C,D)
+    \tkzLabelAngle[pos=0.8](D,C,A){\footnotesize{$\degC^\circ$}}
+    
+    \tkzMarkAngle[fill=mypurple!40,mark=,size=0.4,arc=l,opacity=1](C,E,D)
+    \tkzLabelAngle[pos=-0.8](C,E,D){\footnotesize{$\degE^\circ$}}
+    
+    \tkzLabelAngle[pos=1](D,E,B){\footnotesize{$\left(AC\right)\parallel\left(DE\right)$}}
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawSegments(D,C D,E)
+    
+    % label and draw points
+    \tkzLabelPoints[below](D)
+    \tkzLabelPoints[above](C)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above right](E)
+    \tkzDrawPoints[fill=black](A,B,C,D,E)
+   
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, angleC, angleD, angleE
+\def\triangletroisanglesB[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=-3,xmax=9,ymin=0,ymax=3]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degC}{#2}
+    \pgfmathsetmacro{\degD}{#3}
+    \pgfmathsetmacro{\degE}{#4}
+    %\pgfmathsetmacro{\deg}{180-\degE}
+    
+    %CDE = 180-\degA-\degC-\degA
+    %\pgfmathsetmacro{\degEf}{\degB+\degE}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:1){A'}
+    \tkzDefPoint(\degD:3){C}
+    \tkzDefPointBy[rotation=center C angle \degE](A)\tkzGetPoint{C'}
+    \tkzInterLL(C,C')(A,A')\tkzGetPoint{B}
+    
+    \tkzDefPointBy[rotation=center C angle \degE-\degC](A)\tkzGetPoint{D'}
+    \tkzInterLL(C,D')(A,A')\tkzGetPoint{D}
+    
+    \tkzDefPointWith[colinear=at D](A,C)\tkzGetPoint{E'}
+    \tkzInterLL(C,C')(D,E')\tkzGetPoint{E}
+    
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=1.1,arc=l,opacity=1](D,C,B)
+    \tkzLabelAngle[pos=1.5](D,C,B){\footnotesize{$\degC^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.3,arc=l,opacity=1](B,D,E)
+    \tkzLabelAngle[pos=0.6](B,D,E){\footnotesize{$\degD^\circ$}}
+    
+    \tkzMarkAngle[fill=mypurple!40,mark=,size=0.5,arc=l,opacity=1](D,E,B)
+    \tkzLabelAngle[pos=0.9](D,E,B){\footnotesize{$\degE^\circ$}}
+    
+    \tkzLabelAngle[pos=-1.2](D,E,B){\footnotesize{$\left(AC\right)\parallel\left(DE\right)$}}
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawSegments(D,C D,E)
+    
+    % label and draw points
+    \tkzLabelPoints[below](D)
+    \tkzLabelPoints[above](C)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above right](E)
+    \tkzDrawPoints[fill=black](A,B,C,D,E)
+   
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, angleA, angleI
+\def\parallelogrammedeuxanglesC[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=7.5,ymin=-3,ymax=0]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degD}{#3}
+    
+    % figure
+    \tkzDefPoint(0:0){D}
+    \tkzDefPoint(0:6){C}
+    \tkzDefPoint(-\degD:3){A}
+    
+    \tkzDefPointBy[rotation=center A angle -\degA](D)\tkzGetPoint{M'}
+    \tkzInterLL(D,C)(A,M') \tkzGetPoint{M}
+    
+    \tkzDefPointWith[colinear=at C](D,A)\tkzGetPoint{B}
+    
+    % angles
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.4,arc=l,opacity=1](A,D,M)
+    \tkzLabelAngle[pos=0.8](A,D,M){\footnotesize{$\degD^\circ$}}
+    
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.65,arc=l,opacity=1](M,A,D)
+    \tkzLabelAngle[pos=1](M,A,D){\footnotesize{$\degA^\circ$}}
+    
+    % draw polygon and segments
+    \tkzFillPolygon[color=myorange!20](A,B,C,M)
+    \tkzDrawPolygon(A,B,C,D)
+    \tkzDrawSegments(A,M)
+    
+    % label and draw points
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above right](C)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[above](M)
+    \tkzLabelPoints[above left](D)
+    \tkzDrawPoints[fill=black](A,B,C,D,M)
+   
+\end{tikzpicture}
+\end{center}
+}
+% ----------------------------------------------------------------------
+%scale, angleB, angleE
+\def\triangledeuxanglesB[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=8,ymin=0,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degE}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:7){B}
+    \tkzDefPoint(\degA:2.5){E}
+
+    \tkzDefPointBy[projection = onto A--E](B)  \tkzGetPoint{C}
+    \tkzDefPointBy[rotation=center E angle \degE](A)\tkzGetPoint{E'}
+    \tkzInterLL(E,E')(A,B)\tkzGetPoint{F}
+    
+    \tkzDefPointWith[colinear=at E](A,B)\tkzGetPoint{D'}
+    \tkzInterLL(E,D')(B,C)\tkzGetPoint{D}
+    
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.6,arc=l,opacity=1](F,A,E)
+    \tkzLabelAngle[pos=1](F,A,E){\footnotesize{$\degA^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.3,arc=l,opacity=1](A,E,F)
+    \tkzLabelAngle[pos=0.5](A,E,F){\footnotesize{$\degE^\circ$}}
+    
+    \tkzMarkRightAngle[draw=black,size=.2](A,C,B);
+    
+    \tkzLabelAngle[pos=1.2](E,C,D){\footnotesize{$\left(ED\right)\parallel\left(AB\right)$}}
+    
+    % draw polygon and segments
+    \tkzFillPolygon[color=myorange!20](B,D,E,F)
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawSegments(E,F E,D)
+    
+    % label and draw points
+    \tkzLabelPoints[below](F)
+    \tkzLabelPoints[above left](E)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[below left](B)
+    \tkzLabelPoints[above right](C,D)
+    \tkzDrawPoints[fill=black](A,B,C,D,E,F)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, angle
+\def\anglebissectrice[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \tkzInit[xmin=-0.5,xmax=5,ymin=-0.25,ymax=3]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\deg}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:3.5){B}
+    \tkzDefPoint(\deg:4.5){C}
+    \tkzDefPoint(\deg/2:4.5){D}
+    
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=|,size=1,arc=l,opacity=1](B,A,D)
+    \tkzMarkAngle[fill=myred!40,mark=|,size=1,arc=l,opacity=1](D,A,C)
+    
+    % draw polygon and segments
+    \tkzDrawSegments(A,D)
+    \tkzDrawLines[](A,D)
+    \tkzDrawLines[add= 0.25 and 0.25](A,D)
+    \tkzDrawLines[add= 0 and 0.5](A,C A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[above left](A,C)
+    \tkzLabelPoints[above right](D)
+    \tkzLabelPoint[below](D){$\left(AD\right)=biss\widehat{BAC}$}
+    \tkzLabelPoints[below left](B)
+    \tkzDrawPoints[fill=black](A,B,C,D)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, angleA, angleB
+\def\triangledeuxbissectrices[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=8,ymin=0,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degB}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:7){B}
+    \tkzDefPoint(2*\degA:4){C'}
+    
+    \tkzDefPointBy[rotation=center B angle 180-2*\degB](A)\tkzGetPoint{B'}
+    
+    \tkzInterLL(A,C')(B,B')\tkzGetPoint{C}
+    
+    \tkzDefLine[bisector](B,A,C)  \tkzGetPoint{D'}
+    \tkzDefLine[bisector](C,B,A)  \tkzGetPoint{E'}
+
+    \tkzInterLL(B,E')(A,C)\tkzGetPoint{E}
+    \tkzInterLL(A,D')(B,C)\tkzGetPoint{D}
+
+    \tkzInterLL(E,B)(A,D)\tkzGetPoint{I}
+
+    % fill polygon
+    \tkzFillPolygon[color=myorange!20](I,E,C,D)
+
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=||,size=0.75,arc=l,opacity=1](D,A,E)
+    \tkzLabelAngle[pos=1.3](D,A,E){\footnotesize{$\degA^\circ$}}
+    \tkzMarkAngle[fill=myred!40,mark=||,size=0.75,arc=l,opacity=1](B,A,D)
+    \tkzLabelAngle[pos=1.3](B,A,D){\footnotesize{$\degA^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=|,size=0.8,arc=l,opacity=1](D,B,E)
+    \tkzLabelAngle[pos=1.6](D,B,E){\footnotesize{$\degB^\circ$}}
+    \tkzMarkAngle[fill=myblue!40,mark=|,size=0.8,arc=l,opacity=1](I,B,A)
+    \tkzLabelAngle[pos=1.6](I,B,A){\footnotesize{$\degB^\circ$}}
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawSegments(E,B A,D)
+    
+    % label and draw points
+    \tkzLabelPoints[below](I)
+    \tkzLabelPoints[above right](C,D)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above left](E)
+    \tkzDrawPoints[fill=black](A,B,C,D,E,O)
+\end{tikzpicture}
+\end{center}
+}
+
+
+% ----------------------------------------------------------------------
+%scale, angleB, angleE
+\def\parallelesdeuxangles[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=0,xmax=4,ymin=-2.5,ymax=2.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#2}
+    \pgfmathsetmacro{\degC}{#3}
+
+    % figure
+    \tkzDefPoint(0,-0.5){A}
+    \tkzDefPoint(0,2){F}
+    \tkzDefPoint(0,-2.5){G}
+    
+    \tkzDefPoint(4,0.5){C}
+    \tkzDefPoint(4,-2){E}
+    
+    \tkzDefPointBy[rotation=center A angle \degA](G)\tkzGetPoint{B'}
+    \tkzDefPointBy[rotation=center A angle \degA+90](G)\tkzGetPoint{D'}
+    
+    \tkzDefPointBy[rotation=center C angle -\degC](E)\tkzGetPoint{E'}
+    
+    \tkzInterLL(C,E')(A,B')\tkzGetPoint{B}
+    \tkzInterLL(A,D')(C,E)\tkzGetPoint{D}
+
+    % fill polygon
+    \tkzFillPolygon[color=myorange!20](A,B,C,D)
+
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.8,arc=l,opacity=1](G,A,B)
+    \tkzLabelAngle[pos=1.2](G,A,B){\footnotesize{$\degA^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.75,arc=l,opacity=1](B,C,E)
+    \tkzLabelAngle[pos=1](B,C,E){\footnotesize{$\degC^\circ$}}
+    
+    \tkzMarkRightAngle[draw=black,size=.2](B,A,D);
+    
+    % lines 
+    \tkzDrawLines[add= 0.25 and 0.25](F,G D,E)
+    
+    % draw polygon and segments
+    
+    \tkzDrawSegments(A,D B,C A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[left](A,F,G)
+    \tkzLabelPoints[below](B)
+    \tkzLabelPoints[right](C,D,E)
+    \tkzDrawPoints[fill=black](A,B,C,D,E,F,G)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, angleB, angleE
+\def\triangledeuxanglesC[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1]
+    % setup
+    \tkzInit[xmin=-7,xmax=0,ymin=0,ymax=3.5]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degB}{#2}
+    \pgfmathsetmacro{\degH}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){B}
+    \tkzDefPoint(0:-1){B'}
+    
+    \tkzDefPoint(180-\degB:5){C}
+    
+    \tkzDefPointBy[rotation=center C angle -\degH](B)\tkzGetPoint{A'}
+    
+    \tkzInterLL(C,A')(B,B')\tkzGetPoint{A}
+    
+    \tkzDefPointBy[projection=onto B--C](A) \tkzGetPoint{I}
+    \tkzDefPointBy[projection=onto A--C](B) \tkzGetPoint{J}
+    
+    \tkzInterLL(B,J)(A,I)\tkzGetPoint{H}
+
+    % fill polygon
+    \tkzFillPolygon[color=myorange!20](A,B,H)
+
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.7,arc=l,opacity=1](I,B,A)
+    \tkzLabelAngle[pos=1.3](C,B,J){\footnotesize{$\degB^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.5,arc=l,opacity=1](B,H,I)
+    \tkzLabelAngle[pos=0.9](B,H,I){\footnotesize{$\degH^\circ$}}
+    
+    \tkzMarkRightAngle[draw=black,size=.2](H,I,B);
+    \tkzMarkRightAngle[draw=black,size=.2](A,J,H);
+    
+    % draw polygon and segments
+    \tkzDrawPolygon(A,B,C)
+    \tkzDrawSegments(A,I B,J)
+    
+    % label and draw points
+    \tkzLabelPoints[above left](J)
+    \tkzLabelPoints[below left](A)
+    \tkzLabelPoints[below right](B)
+    \tkzLabelPoints[above right](C,I)
+    \tkzLabelPoints[above](H)
+    \tkzDrawPoints[fill=black](A,B,C,I,J,H)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, angleB, angleE
+\def\parallelessecantes[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \tkzInit[xmin=-3,xmax=6,ymin=-1,ymax=1]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degO}{#3}
+    \pgfmathsetmacro{\degP}{#4}
+
+    % figure
+    \tkzDefPoint(0,0){O}
+    \tkzDefPoint(3,0){P}
+    \tkzDefPoint(-2,0){F}
+    \tkzDefPoint(5,0){E}
+    
+    \tkzDefPointBy[rotation=center O angle \degO](F)\tkzGetPoint{A}
+    \tkzDefPointBy[rotation=center O angle 180](A)\tkzGetPoint{B}
+    
+    \tkzDefPointBy[rotation=center P angle -\degP](E)\tkzGetPoint{C}
+    \tkzDefPointBy[rotation=center P angle 180](C)\tkzGetPoint{D}
+
+    % angles
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.75,arc=l,opacity=1](P,O,B)
+    \tkzLabelAngle[pos=1.4](P,O,B){\footnotesize{$\degO^\circ$}}
+    
+    \tkzMarkAngle[fill=myblue!40,mark=,size=0.4,arc=l,opacity=1](C,P,E)
+    \tkzLabelAngle[pos=0.75](C,P,E){\footnotesize{$\degP^\circ$}}
+    
+    % draw lines
+    \tkzDrawLines[add= 0.5 and 0.5](E,F A,B C,D)
+    
+    % label and draw points
+    \tkzLabelPoints[above left](F,O,P,A,B,D)
+    \tkzLabelPoints[below right](C,E)
+    \tkzDrawPoints[fill=black](F,O,P,E,A,B,C,D)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, angleB, angleE
+\def\parallelessecantesB[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    \tkzInit[xmin=-3,xmax=6,ymin=0,ymax=3]
+    \tkzClip[space=0.5]
+    \pgfmathsetmacro{\degA}{#3}
+    \pgfmathsetmacro{\degC}{#4}
+
+    % figure
+    \tkzDefPoint(0:0){C}
+    \tkzDefPoint(0:1){C'}
+    
+    %\tkzDefPoint(0:2){D}
+    \tkzDefPoint(\degC:3){A}
+    
+    \tkzDefPointBy[rotation=center A angle \degC](C)\tkzGetPoint{D'}
+    
+    \tkzInterLL(A,D')(C,C')\tkzGetPoint{D}
+    
+    \tkzDefPointBy[rotation=center A angle \degA](D)\tkzGetPoint{B}
+    
+    % angles
+    \tkzMarkAngle[fill=myblue!40,mark=|,size=0.5,arc=l,opacity=1](D,C,A)
+    \tkzLabelAngle[pos=1](D,C,A){\footnotesize{$\degC^\circ$}}
+    \tkzMarkAngle[fill=myblue!40,mark=|,size=0.5,arc=l,opacity=1](C,A,D)
+    \tkzLabelAngle[pos=1](C,A,D){\footnotesize{$\degC^\circ$}}
+    
+    \tkzMarkAngle[fill=myred!40,mark=,size=0.5,arc=l,opacity=1](D,A,B)
+    \tkzLabelAngle[pos=1](D,A,B){\footnotesize{$\degA^\circ$}}
+    
+    % draw lines
+    \tkzDrawLines[add= 0.5 and 0.5](A,B C,D)
+    \tkzDrawSegments[](A,C A,D)
+    
+    % label and draw points
+    \tkzLabelPoints[above left](A,B)
+    \tkzLabelPoints[below right](C,D)
+    \tkzDrawPoints[fill=black](A,B,C,D)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, distance
+\def\lineA[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    %\tkzInit[xmin=-3,xmax=6,ymin=0,ymax=0.1]
+    %\tkzClip[space=0.5]
+    \pgfmathsetmacro{\dAB}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:\dAB){B}
+    
+    % draw lines
+    \tkzDrawLines[add= 0.5 and 0.5](A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[above right](A,B)
+    \tkzDrawPoints[fill=black](A,B)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, distance
+\def\lineB[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    %\tkzInit[xmin=-3,xmax=6,ymin=0,ymax=0.1]
+    %\tkzClip[space=0.5]
+    \pgfmathsetmacro{\dAB}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:\dAB){B}
+    
+    % draw lines
+    \tkzDrawLines[add= 0 and 0.5](A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[above right](A,B)
+    \tkzDrawPoints[fill=black](A,B)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, distance
+\def\lineC[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    %\tkzInit[xmin=-3,xmax=6,ymin=0,ymax=0.1]
+    %\tkzClip[space=0.5]
+    \pgfmathsetmacro{\dAB}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:\dAB){B}
+    
+    % draw lines
+    \tkzDrawLines[add= 0 and 0.5](A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[above right](A,B)
+    \tkzDrawPoints[fill=black](B)
+    \tkzDrawPoints[fill=white](A)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, distance
+\def\lineD[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    %\tkzInit[xmin=-3,xmax=6,ymin=0,ymax=0.1]
+    %\tkzClip[space=0.5]
+    \pgfmathsetmacro{\dAB}{#3}
+    \pgfmathsetmacro{\dy}{#4}
+
+    % figure
+    \tkzDefPoint(0,0){A}
+    \tkzDefPoint(\dAB,0){B}
+    \tkzDefPoint(0,\dy){C}
+    \tkzDefPoint(\dAB,\dy){D}
+    
+    % draw lines
+    \tkzDrawLines[add= 0.7 and 0.5](A,B)
+    \tkzDrawLines[add= 0.5 and 0.5](C,D)
+    
+    % label and draw points
+    \tkzLabelPoint[above left](A){$d$}
+    \tkzLabelPoint[above left](C){$d'$}
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, distance
+\def\linesegment[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    %\tkzInit[xmin=-3,xmax=6,ymin=0,ymax=0.1]
+    %\tkzClip[space=0.5]
+    \pgfmathsetmacro{\dAB}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:\dAB){B}
+    
+    % draw lines
+    \tkzDrawSegments[](A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[above right](A,B)
+    \tkzDrawPoints[fill=black](A,B)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, distance
+\def\linesegmentB[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    %\tkzInit[xmin=-3,xmax=6,ymin=0,ymax=0.1]
+    %\tkzClip[space=0.5]
+    \pgfmathsetmacro{\dAB}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:\dAB){B}
+    
+    % draw lines
+    \tkzDrawSegments[](A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[above right](A,B)
+    \tkzDrawPoints[fill=white](A,B)
+   
+\end{tikzpicture}
+\end{center}
+}
+
+
+% ----------------------------------------------------------------------
+%scale, rotate, distance
+\def\linesegmentC[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    % setup
+    %\tkzInit[xmin=-3,xmax=6,ymin=0,ymax=0.1]
+    %\tkzClip[space=0.5]
+    \pgfmathsetmacro{\dAB}{#3}
+
+    % figure
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:\dAB){B}
+    
+    % draw lines
+    \tkzDrawSegments[](A,B)
+    
+    % label and draw points
+    \tkzLabelPoints[above right](A,B)
+    \tkzDrawPoints[fill=black](B)
+    \tkzDrawPoints[fill=white](A)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\droitessecantes[#1,#2,#3,#4]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\deg}{#3}
+    \pgfmathsetmacro{\r}{#4}
+    \pgfmathsetmacro{\rC}{\r*0.75}
+    \pgfmathsetmacro{\degC}{\deg+180}
+    % coordinates
+    \tkzDefPoint(0:0){I}
+    \tkzDefPoint(0:\r){B}
+    \tkzDefPoint(180:\rC){A}
+    \tkzDefPoint(\deg:\r){D}
+    \tkzDefPoint(\degC:\rC){C}
+    
+    % lines
+    \tkzDrawLines[add= 0.2 and 0.3](A,B C,D)
+    % points
+    \tkzDrawPoints[color=black,fill=black](I)
+    \tkzLabelPoint[above right](A){$d'$}
+    \tkzLabelPoint[below right](C){$d$}
+    \tkzLabelPoints[below](I)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\droitesperpendiculaires[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\r}{#3}
+    \pgfmathsetmacro{\rC}{\r*0.75}
+
+    % coordinates
+    \tkzDefPoint(0:0){O}
+    \tkzDefPoint(0:\r){B}
+    \tkzDefPoint(180:\rC){A}
+    \tkzDefPoint(90:\r){D}
+    \tkzDefPoint(-90:\rC){C}
+    
+    % lines
+    \tkzDrawLines[add= 0.1 and 0.3](A,B C,D)
+    % points
+    \tkzMarkRightAngle[draw=black,size=.2](B,O,D);
+    \tkzLabelAngle[pos=0.7](B,O,D){\begin{scriptsize}$90^\circ$\end{scriptsize}}
+    
+    \tkzDrawPoints[color=black,fill=black](O)
+    \tkzLabelPoint[below right](A){$d$}
+    \tkzLabelPoint[above right](C){$d'$}
+    \tkzLabelPoints[above left](O)
+    %\tkzLabelPoint[above right=3pt](O){\begin{footnotesize}$90^\circ$\end{footnotesize}}
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\milieuA[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\dAB}{#3}
+    \pgfmathsetmacro{\dM}{\dAB/2}
+    
+    % coordinates
+    \tkzDefPoint(0:0){A}
+    \tkzDefPoint(0:\dAB){B}
+    \tkzDefPoint(0:\dM){O}
+    %\tkzDefPoint(0,0){O}
+    % lines
+    %\tkzInterCC(B,A)(A,B)\tkzGetPoints{M}{N}
+    %\tkzSetUpCompass[color=myred,style=dashed]
+    %\tkzCompass[length=2.5](A,M)
+    %\tkzCompass[length=2.5](B,M)
+    %\tkzCompass[length=2.5](A,N)
+    %\tkzCompass[length=2.5](B,N)
+    %\tkzMarkRightAngle[draw=black,size=.2](B,O,N);
+    
+    %\tkzDrawLine[color= myred, add= 0.1 and 0.1](M,N)
+    \tkzDrawSegments(A,B)
+    % points
+    \tkzLabelPoints[above left](A)
+    \tkzLabelPoints[above right](B)
+    \tkzLabelPoint[above](O){$M$}
+    %\tkzLabelSegment[pos=0.3,color=myred,above right](N,O){$m$}
+    %\tkzLabelPoint[color=myred,above right](N){$m$}
+    
+    \tkzMarkSegments[mark=||](A,O B,O)
+    \tkzDrawPoints[color=black,fill=black](A,B,O)
+    %\tkzDrawPoints(M,N)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+%scale, rotate, deg, r
+\def\mediatriceA[#1,#2,#3]{
+\begin{center}
+\begin{tikzpicture}[scale=#1,rotate=#2]
+    \pgfmathsetmacro{\r}{#3}
+    \pgfmathsetmacro{\rC}{-\r}
+    
+    % coordinates
+    \tkzDefPoint(\rC,0){A}
+    \tkzDefPoint(\r,0){B}
+    \tkzDefPoint(0,0){O}
+    % lines
+    \tkzInterCC(B,A)(A,B)\tkzGetPoints{M}{N}
+    \tkzSetUpCompass[color=myred,style=dashed]
+    \tkzCompass[length=2.5](A,M)
+    \tkzCompass[length=2.5](B,M)
+    \tkzCompass[length=2.5](A,N)
+    \tkzCompass[length=2.5](B,N)
+    \tkzMarkRightAngle[draw=black,size=.2](B,O,N);
+    
+    \tkzDrawLine[color= myred, add= 0.1 and 0.1](M,N)
+    \tkzDrawSegments(A,B)
+    % points
+    \tkzLabelPoints[above left](A)
+    \tkzLabelPoints[above right](B)
+    \tkzLabelPoint[above left](O){$M$}
+    \tkzLabelSegment[pos=0.3,color=myred,above right](N,O){$m$}
+    %\tkzLabelPoint[color=myred,above right](N){$m$}
+    
+    \tkzMarkSegments[mark=||](A,O B,O)
+    \tkzDrawPoints[color=black,fill=black](A,B,O)
+    \tkzDrawPoints(M,N)
+\end{tikzpicture}
+\end{center}
+}
+
+% ----------------------------------------------------------------------
+\tikzset{
+arrowMe/.style={postaction=decorate,
+    decoration={markings, mark=at position .5 with {\arrow[thick]{#1}}
+    } }}
+
+% ----------------------------------------------------------------------
+\newcommand\polygonfilled[3][]{
+\begin{tikzpicture}[scale=#3]
+  \pgfmathsetmacro{\angle}{360/#2}
+  \pgfmathsetmacro{\startangle}{-90 + \angle/2}
+  \pgfmathsetmacro{\y}{cos(\angle/2)}
+  \begin{scope}[#1]
+    \foreach \i in {1,2,...,#2} {
+      \pgfmathsetmacro{\x}{\startangle + \angle*\i}
+      \fill[fill=myorange!20] (0, 0) -- (\x:1 cm) -- (\x + \angle/2:\y cm) -- cycle;
+      \fill[fill=myorange!20] (0, 0) -- (\x + \angle/2:\y cm) -- (\x + \angle:1 cm) -- cycle;
+      
+      \draw[] (0, 0)  (\x:1 cm) -- (\x + \angle/2:\y cm) -- cycle;
+      \draw[] (0, 0)  (\x + \angle/2:\y cm) -- (\x + \angle:1 cm) -- cycle;
+    }
+  \end{scope}
+\end{tikzpicture}  
+}
+
+% % ----------------------------------------------------------------------
+% %scale, rotate, r
+% \def\lineE[#1,#2,#3]{
+% \begin{center}
+% \begin{tikzpicture}[scale=#1,rotate=#2]
+%     \pgfmathsetmacro{\r}{#3}
+%     % coordinates
+%     \tkzDefPoint(0:0){O}
+%     \tkzDefPoint(0:\r){B}
+%     \tkzDefPoint(90:\r){A}
+%     \pgfmathsetmacro{\rC}{\r*0.75}
+    
+%     \tkzDefPoint(180:\C){C}
+%     \tkzDefPoint(90:\rC){D}
+    
+%     % lines
+%     %\tkzDrawLines[add= 0.2 and 0.5](C,B)
+%     %\tkzDrawLines[add= 0.2 and 0.5](D,O)
+    
+%     % points
+%     \tkzDrawPoints[color=black,fill=black](O,A,B)
+%     \tkzLabelPoint[above left](C){$d$}
+%     \tkzLabelPoint[above right](D){$d'$}
+%     \tkzLabelPoints[above left](O)
+% \end{tikzpicture}
+% \end{center}
+% }
+
+%Collection of functions
+%Equations (5e)
+% ----------------------------------------------------------------------
+%Une parcelle rectangulaire dont la longueur $L$ est le triple de la largeur $l$ est entourée d'un parterre fleuri de $3\,m$ de large (voir figure ci-contre). Quelles sont les dimensions de la parcelle sachant que l’aire du parterre est $228\,m^2$.
+%\parterrefleuri[0.2,30,14,3] %scale, longueur totale, largeur totale, largeur parterre
+% ----------------------------------------------------------------------
+
+%\trapezerectangle[0.5,10,6,6] %scale, longueur, largeur, position M
+
+%\deuxrectangles[1,6,3,1,1,4,2] %scale, coordonnées C(x,y), E(x,y), G(x,y)
+
+%\rectanglecoupe[0.75,5,2,6,4] %scale, coordonnées C(x,y), E(x,y) (only use integers)
+
+%\rectanglecle[0.75,a] %scale, label a  
+
+% \begin{tikzpicture}[scale=0.75]
+%     \planepartition{{3,2,1},{2,1,1},{1,1}} %right line, middle line, left line
+% \end{tikzpicture}
+
+
+%Collection of functions
+%Angles (5e)
+% ----------------------------------------------------------------------
